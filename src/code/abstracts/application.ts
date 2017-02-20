@@ -1,4 +1,6 @@
-import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import '../controls/orbit-controls';
+
+import { Color, PerspectiveCamera, Scene, WebGLRenderer, OrbitControls } from 'three';
 
 export class Application {
 
@@ -8,15 +10,18 @@ export class Application {
 
     this._scene = new Scene();
 
-    this._renderer = new WebGLRenderer();
+    this._renderer = new WebGLRenderer({
+      antialias: true,
+    });
     this._renderer.setPixelRatio(window.devicePixelRatio);
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
 
-    // this._controls = new OrbitControls(this._camera, this._renderer.domElement);
-    // this._controls.enableDamping = true;
-    // this._controls.dampingFactor = 0.25;
-    // this._controls.enableZoom = false;
+
+    this._controls = new OrbitControls(this.camera, this._renderer.domElement);
+    this._controls.enableDamping = true;
+    this._controls.dampingFactor = 0.25;
+    this._controls.enableZoom = false;
 
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
@@ -36,7 +41,8 @@ export class Application {
   }
   private _scene: Scene;
 
-  // private _controls: OrbitControls;
+  private _controls: OrbitControls;
+
 
   public onWindowResize() {
     this._camera.aspect = window.innerWidth / window.innerHeight;
@@ -44,9 +50,10 @@ export class Application {
     this._renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  public animate(timestamp) {
+  public animate(timestamp = null) {
     requestAnimationFrame(this.animate.bind(this));
-    // this._controls.update();
+    this._controls.update();
+
     this._renderer.render(this._scene, this._camera);
   }
 }

@@ -16,7 +16,6 @@
     "dat-gui": "^0.5.0",
     "glslify": "^6.0.1",
     "three": "^0.84.0",
-    "three-orbit-controls": "~82.1.0",
     "webvr-boilerplate": "^0.5.0",
     "webvr-polyfill": "^0.9.25"
   },
