@@ -1,21 +1,20 @@
-import {
-  TextureLoader,
-  BoxGeometry,
-  SphereBufferGeometry,
-  IcosahedronGeometry,
-  TorusKnotBufferGeometry,
-  BoxBufferGeometry,
-  Mesh,
-  Texture,
-  MeshBasicMaterial,
-  LinearMipMapLinearFilter,
-  CubeCamera,
-  Math as ThreeMath,
-  UVMapping,
-  CubeTextureLoader,
-
-} from 'three';
 import { Application } from './abstracts';
+import {
+  BoxBufferGeometry,
+  CubeCamera,
+  IcosahedronGeometry,
+  LinearMipMapLinearFilter,
+  Math as ThreeMath,
+  Mesh,
+  MeshBasicMaterial,
+  MeshPhongMaterial,
+  SphereBufferGeometry,
+  Texture,
+  PointLight,
+  TextureLoader,
+  TorusKnotBufferGeometry,
+  UVMapping
+} from 'three';
 
 export class Main extends Application {
 
@@ -49,11 +48,11 @@ export class Main extends Application {
   }
 
 
-  private _material: MeshBasicMaterial;
-  public get material(): MeshBasicMaterial {
+  private _material: MeshPhongMaterial;
+  public get material(): MeshPhongMaterial {
     return this._material;
   }
-  public set material(v: MeshBasicMaterial) {
+  public set material(v: MeshPhongMaterial) {
     this._material = v;
   }
 
@@ -73,6 +72,10 @@ export class Main extends Application {
     skybox.scale.x = -1;
     this.scene.add(skybox);
 
+    // var light = new PointLight(0xff0000, 1, 100);
+    // light.position.set(400, 50, 50);
+    // this.scene.add(light);
+
     this.cubeCamera1 = new CubeCamera(1, 1000, 256);
     this.cubeCamera1.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.scene.add(this.cubeCamera1);
@@ -81,10 +84,9 @@ export class Main extends Application {
     this.cubeCamera2.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.scene.add(this.cubeCamera2);
 
-    this.material = new MeshBasicMaterial({
+    this.material = new MeshPhongMaterial({
       envMap: this.cubeCamera2.renderTarget.texture,
     });
-
 
     this.sphere = new Mesh(new IcosahedronGeometry(20, 3), this.material);
     this.scene.add(this.sphere);
@@ -97,12 +99,6 @@ export class Main extends Application {
     this.count = 0;
   }
 
-
-  private lat: number = 0;
-  private lon: number = 0;
-
-  private phi: number = 0;
-  private theta: number = 0;
 
   public render() {
     this.count++;
@@ -127,12 +123,10 @@ export class Main extends Application {
     this.torus.rotation.x += 0.02;
     this.torus.rotation.y += 0.03;
 
-    // this.camera.position.x = 100 * Math.sin(this.phi) * Math.cos(this.theta);
-    // this.camera.position.y = 100 * Math.cos(this.phi);
-    // this.camera.position.z = 100 * Math.sin(this.phi) * Math.sin(this.theta);
-
     this.camera.lookAt(this.scene.position);
-
+    this.camera.position.x = 100 * Math.sin(this.phi) * Math.cos(this.theta);
+    this.camera.position.y = 100 * Math.cos(this.phi);
+    this.camera.position.z = 100 * Math.sin(this.phi) * Math.sin(this.theta);
     this.sphere.visible = false;
 
     if (this.count % 2 === 0) {
@@ -145,8 +139,6 @@ export class Main extends Application {
     this.count++;
 
     this.sphere.visible = true;
-
-    super.render();
   }
 
   private _textureLoader: TextureLoader;

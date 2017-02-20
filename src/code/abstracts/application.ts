@@ -1,27 +1,23 @@
-import '../controls/orbit-controls';
+import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
-import { Color, PerspectiveCamera, Scene, WebGLRenderer, OrbitControls } from 'three';
-
-export class Application {
+export abstract class Application {
 
   constructor() {
-    this._camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000);
-    this._camera.position.z = 200;
-
+    this._camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 
     this._scene = new Scene();
 
     this._renderer = new WebGLRenderer({
-      antialias: true,
     });
     this._renderer.setPixelRatio(window.devicePixelRatio);
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
 
 
-    this._controls = new OrbitControls(this.camera, this._renderer.domElement);
+    document.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+    document.addEventListener('wheel', this.onDocumentMouseWheel.bind(this), false);
 
-    this._controls.enableZoom = true;
+    window.addEventListener('resize', this.onWindowResized.bind(this), false);
 
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
@@ -41,22 +37,67 @@ export class Application {
   }
   private _scene: Scene;
 
-  private _controls: OrbitControls;
 
-
-  public onWindowResize() {
+  public onWindowResize(): void {
     this._camera.aspect = window.innerWidth / window.innerHeight;
     this._camera.updateProjectionMatrix();
     this._renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  public animate(timestamp = null) {
+  public animate(timestamp = null): void {
     requestAnimationFrame(this.animate.bind(this));
-    this._controls.update();
     this.render();
-  }
-
-  public render() {
     this.renderer.render(this.scene, this.camera);
   }
+
+  public onWindowResized(event) {
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+  }
+
+  protected lat: number = 0;
+  protected lon: number = 0;
+
+  protected onPointerDownPointerX: number = 0;
+  protected onPointerDownPointerY: number = 0;
+  protected onPointerDownLon: number = 0;
+  protected onPointerDownLat: number = 0;
+
+  protected phi: number = 0;
+  protected theta: number = 0;
+
+  public onDocumentMouseDown(event) {
+
+    event.preventDefault();
+
+    this.onPointerDownPointerX = event.clientX;
+    this.onPointerDownPointerY = event.clientY;
+
+    this.onPointerDownLon = this.lon;
+    this.onPointerDownLat = this.lat;
+
+    document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
+    document.addEventListener('mouseup', this.onDocumentMouseUp.bind(this), false);
+
+  }
+
+  public onDocumentMouseMove(event) {
+    this.lon = (event.clientX - this.onPointerDownPointerX) * 0.1 + this.onPointerDownLon;
+    this.lat = (event.clientY - this.onPointerDownPointerY) * 0.1 + this.onPointerDownLat;
+  }
+
+  public onDocumentMouseUp(event) {
+    document.removeEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
+    document.removeEventListener('mouseup', this.onDocumentMouseUp.bind(this), false);
+  }
+
+  public onDocumentMouseWheel(event) {
+    this.camera.fov += (event.deltaY * 0.05);
+    this.camera.updateProjectionMatrix();
+  }
+
+
+  public abstract render(): void;
 }
