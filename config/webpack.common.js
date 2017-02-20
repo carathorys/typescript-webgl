@@ -25,17 +25,17 @@ let config = {
   devtool: "source-map",
 
   module: {
-    rules: [{
-        test: /\.ts$/,
-        enforce: 'pre',
-        loader: 'tslint-loader'
-      },
-      {
-        test: /\.js$/,
-        enforce: 'post',
-        loader: 'ify-loader'
-      }
-    ],
+    // rules: [{
+    //     test: /\.ts$/,
+    //     enforce: 'pre',
+    //     loader: 'tslint-loader'
+    //   },
+    //   // {
+    //   //   test: /\.js$/,
+    //   //   enforce: 'post',
+    //   //   loader: 'ify-loader'
+    //   // }
+    // ],
     // allow local glslify/browserify config to work
     // postLoaders: [{
     //   test: /\.js$/,
@@ -48,7 +48,7 @@ let config = {
       },
       {
         test: /node_modules/,
-        loader: 'ify'
+        loader: 'ify-loader'
       },
       {
         test: /\.css$/,

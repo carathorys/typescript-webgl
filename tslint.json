@@ -38,6 +38,8 @@
             true,
             "check-branch",
             "check-decl",
+            "check-module",
+            "check-typecast",
             "check-operator",
             "check-separator",
             "check-type"
@@ -65,7 +67,8 @@
         ],
         "quotemark": [
             true,
-            "double"
+            "avoid-escape",
+            "single"
         ],
         "semicolon": [
             true,
