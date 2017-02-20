@@ -10,7 +10,7 @@ const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 let rootDir = path.resolve(__dirname, '..');
 let cleanDirectories = ['build', 'dist'];
 // Plugins configuration
-let plugins = [new webpack.NoErrorsPlugin()];
+let plugins = [new webpack.NoEmitOnErrorsPlugin()];
 
 // Default value for development env
 let outputPath = path.join(rootDir, 'build');
@@ -79,7 +79,7 @@ module.exports = function configuration(options) {
 
   let entryAppPath = {
     'app': path.resolve(__dirname, '../src/app.ts'),
-    'vendor': path.resolve(__dirname, '../src/vendor.ts')
+    // 'vendor': path.resolve(__dirname, '../src/vendor.ts')
   };
 
   if (prod) {
@@ -87,9 +87,26 @@ module.exports = function configuration(options) {
     outputPath = path.join(rootDir, 'dist');
     plugins.push(
       new webpack.optimize.UglifyJsPlugin({
-        warnings: false,
-        minimize: true,
-        sourceMap: false
+        beautify: false, //prod
+        output: {
+          comments: false
+        }, //prod
+        mangle: {
+          screw_ie8: true
+        }, //prod
+        compress: {
+          screw_ie8: true,
+          warnings: false,
+          conditionals: true,
+          unused: true,
+          comparisons: true,
+          sequences: true,
+          dead_code: true,
+          evaluate: true,
+          if_return: true,
+          join_vars: true,
+          negate_iife: false // we need this for lazy v8
+        },
       })
     );
   }
@@ -104,6 +121,11 @@ module.exports = function configuration(options) {
   );
 
   plugins.push(new CheckerPlugin());
+
+  // plugins.push(new webpack.optimize.CommonsChunkPlugin({
+  //   name: "vendor",
+  //   filename: "vendor.bundle.js"
+  // }));
 
   plugins.push(
     new CopyWebpackPlugin([{
