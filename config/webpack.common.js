@@ -1,13 +1,10 @@
-import path from 'path';
-import webpack from 'webpack';
-
-import _ from 'lodash';
-
-import Clean from 'clean-webpack-plugin';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import CopyWebpackPlugin from 'copy-webpack-plugin';
-
-import CheckerPlugin from 'awesome-typescript-loader';
+const _ = require("lodash");
+const path = require('path');
+const webpack = require('webpack');
+const Clean = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 
 // Root app path
 let rootDir = path.resolve(__dirname, '..');
@@ -20,27 +17,33 @@ let outputPath = path.join(rootDir, 'build');
 let suffix = 'dev';
 
 let config = {
+  cache: false,
   resolve: {
-    modulesDirectories: ['src', 'node_modules', 'local_modules'],
-    extensions: ['', '.js', '.ts']
+    extensions: ['.js', '.ts'],
+    modules: ['src', 'node_modules', 'local_modules']
   },
+  devtool: "source-map",
+
   module: {
     rules: [{
-      test: /\.ts$/,
-      enforce: 'pre',
-      loader: 'tslint-loader',
-    }],
+        test: /\.ts$/,
+        enforce: 'pre',
+        loader: 'tslint-loader'
+      },
+      {
+        test: /\.js$/,
+        enforce: 'post',
+        loader: 'ify-loader'
+      }
+    ],
     // allow local glslify/browserify config to work
-    postLoaders: [{
-      test: /\.js$/,
-      loader: 'ify'
-    }],
+    // postLoaders: [{
+    //   test: /\.js$/,
+    //   loader: 'ify'
+    // }],
     loaders: [{
         test: /\.ts$/,
         loader: 'awesome-typescript-loader',
-        query: {
-          configFileName: "tsconfig.webpack.json"
-        },
         exclude: [/\.(spec|e2e)\.ts$/]
       },
       {
@@ -74,7 +77,10 @@ module.exports = function configuration(options) {
 
   let hash = prod ? '-[hash]' : '';
 
-  let entryAppPath = [path.resolve(__dirname, '../src/app.ts'), path.resolve(__dirname, '../src/vendor.ts')];
+  let entryAppPath = {
+    'app': path.resolve(__dirname, '../src/app.ts'),
+    'vendor': path.resolve(__dirname, '../src/vendor.ts')
+  };
 
   if (prod) {
     suffix = 'prod';
@@ -106,22 +112,8 @@ module.exports = function configuration(options) {
     }, ])
   );
 
-  plugins.push(
-    new webpack.optimize.DedupePlugin()
-  );
-
-  plugins.push(
-    new webpack.optimize.OccurenceOrderPlugin(true)
-  );
-
-  if (!prod) {
-    entryAppPath.push('webpack/hot/dev-server');
-  }
-
   return _.merge({}, config, {
-    entry: {
-      bundle: entryAppPath,
-    },
+    entry: entryAppPath,
     output: {
       path: outputPath,
       filename: '[name]' + hash + '.js'
