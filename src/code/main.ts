@@ -6,6 +6,7 @@ import {
   TorusKnotBufferGeometry,
   BoxBufferGeometry,
   Mesh,
+  Texture,
   MeshBasicMaterial,
   LinearMipMapLinearFilter,
   CubeCamera,
@@ -59,11 +60,16 @@ export class Main extends Application {
   constructor() {
     super();
 
-    let full = this.textureLoader.load('textures/skybox/o2.jpg');
-    full.mapping = UVMapping;
+    let full = this.textureLoader.load('textures/skybox/o2.jpg', texture => {
+      texture.mapping = UVMapping;
+      this.finishInitialization(texture)
+      this.animate();
+    });
+  }
 
+  public finishInitialization(texture: Texture) {
 
-    let skybox = new Mesh(new SphereBufferGeometry(500, 32, 16), new MeshBasicMaterial({ map: full }));
+    let skybox = new Mesh(new SphereBufferGeometry(500, 32, 16), new MeshBasicMaterial({ map: texture }));
     skybox.scale.x = -1;
     this.scene.add(skybox);
 
@@ -75,7 +81,6 @@ export class Main extends Application {
     this.cubeCamera2.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.scene.add(this.cubeCamera2);
 
-    let geometry = new BoxGeometry(200, 200, 200);
     this.material = new MeshBasicMaterial({
       envMap: this.cubeCamera2.renderTarget.texture,
     });
@@ -89,16 +94,15 @@ export class Main extends Application {
 
     this.torus = new Mesh(new TorusKnotBufferGeometry(10, 5, 100, 25), this.material);
     this.scene.add(this.torus);
-
-    this.animate();
+    this.count = 0;
   }
 
 
   private lat: number = 0;
   private lon: number = 0;
 
-  private phi: number;
-  private theta: number;
+  private phi: number = 0;
+  private theta: number = 0;
 
   public render() {
     this.count++;
@@ -127,19 +131,20 @@ export class Main extends Application {
     // this.camera.position.y = 100 * Math.cos(this.phi);
     // this.camera.position.z = 100 * Math.sin(this.phi) * Math.sin(this.theta);
 
-    // this.camera.lookAt(this.scene.position);
+    this.camera.lookAt(this.scene.position);
 
+    this.sphere.visible = false;
 
     if (this.count % 2 === 0) {
-
       this.material.envMap = this.cubeCamera1.renderTarget.texture;
       this.cubeCamera2.updateCubeMap(this.renderer, this.scene);
-
     } else {
-
       this.material.envMap = this.cubeCamera2.renderTarget.texture;
       this.cubeCamera1.updateCubeMap(this.renderer, this.scene);
     }
+    this.count++;
+
+    this.sphere.visible = true;
 
     super.render();
   }

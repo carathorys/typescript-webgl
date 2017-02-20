@@ -6,7 +6,7 @@ export class Application {
 
   constructor() {
     this._camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000);
-    this._camera.position.z = 400;
+    this._camera.position.z = 200;
 
 
     this._scene = new Scene();
@@ -20,10 +20,8 @@ export class Application {
 
 
     this._controls = new OrbitControls(this.camera, this._renderer.domElement);
-    this._controls.enableDamping = true;
-    this._controls.dampingFactor = 0.25;
 
-    this._controls.enableZoom = false;
+    this._controls.enableZoom = true;
 
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
