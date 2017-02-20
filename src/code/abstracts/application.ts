@@ -5,8 +5,9 @@ import { Color, PerspectiveCamera, Scene, WebGLRenderer, OrbitControls } from 't
 export class Application {
 
   constructor() {
-    this._camera = new PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
+    this._camera = new PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000);
     this._camera.position.z = 400;
+
 
     this._scene = new Scene();
 
@@ -21,6 +22,7 @@ export class Application {
     this._controls = new OrbitControls(this.camera, this._renderer.domElement);
     this._controls.enableDamping = true;
     this._controls.dampingFactor = 0.25;
+
     this._controls.enableZoom = false;
 
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -53,7 +55,10 @@ export class Application {
   public animate(timestamp = null) {
     requestAnimationFrame(this.animate.bind(this));
     this._controls.update();
+    this.render();
+  }
 
-    this._renderer.render(this._scene, this._camera);
+  public render() {
+    this.renderer.render(this.scene, this.camera);
   }
 }

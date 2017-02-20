@@ -1,75 +1,148 @@
 import {
   TextureLoader,
   BoxGeometry,
-  SphereGeometry,
-  PointLight,
+  SphereBufferGeometry,
+  IcosahedronGeometry,
+  TorusKnotBufferGeometry,
+  BoxBufferGeometry,
   Mesh,
-  MeshPhysicalMaterial,
   MeshBasicMaterial,
-
-  ShaderMaterial,
-  DoubleSide,
-  ShaderLib,
+  LinearMipMapLinearFilter,
+  CubeCamera,
+  Math as ThreeMath,
+  UVMapping,
   CubeTextureLoader,
-  RGBFormat
+
 } from 'three';
 import { Application } from './abstracts';
 
 export class Main extends Application {
 
+
+  private _count: number;
+  public get count(): number {
+    return this._count;
+  }
+  public set count(v: number) {
+    this._count = v;
+  }
+
+  private sphere: Mesh;
+  private torus: Mesh;
+  private cube: Mesh;
+
+  private _cubeCamera1: CubeCamera;
+  public get cubeCamera1(): CubeCamera {
+    return this._cubeCamera1;
+  }
+  public set cubeCamera1(v: CubeCamera) {
+    this._cubeCamera1 = v;
+  }
+
+  private _cubeCamera2: CubeCamera;
+  public get cubeCamera2(): CubeCamera {
+    return this._cubeCamera2;
+  }
+  public set cubeCamera2(v: CubeCamera) {
+    this._cubeCamera2 = v;
+  }
+
+
+  private _material: MeshBasicMaterial;
+  public get material(): MeshBasicMaterial {
+    return this._material;
+  }
+  public set material(v: MeshBasicMaterial) {
+    this._material = v;
+  }
+
   constructor() {
     super();
 
-    // let urls = [
-    //   'textures/skybox/side0.png',
-    //   'textures/skybox/side1.png',
-    //   'textures/skybox/side2.png',
-    //   'textures/skybox/side3.png',
-    //   'textures/skybox/side4.png',
-    //   'textures/skybox/side5.png'
-    // ];
+    let full = this.textureLoader.load('textures/skybox/o2.jpg');
+    full.mapping = UVMapping;
 
-    let full = this.textureLoader.load('textures/skybox/original.jpg');
 
-    // setTimeout(() => {
-    // let shader = ShaderLib.cube;
-    // shader.uniforms['tCube'].value = full;
-
-    // let skyMaterial = new ShaderMaterial({
-    //   fragmentShader: shader.fragmentShader,
-    //   vertexShader: shader.vertexShader,
-    //   uniforms: shader.uniforms,
-    //   depthWrite: false,
-    //   side: DoubleSide
-    // });
-
-    let skybox = new Mesh(new SphereGeometry(500, 500, 500), new MeshBasicMaterial({ color: 0xffffff, map: full, side: DoubleSide }));
+    let skybox = new Mesh(new SphereBufferGeometry(500, 32, 16), new MeshBasicMaterial({ map: full }));
+    skybox.scale.x = -1;
     this.scene.add(skybox);
-    // })
 
-    let amb = this.textureLoader.load('textures/stone/AmbientOcclusionMap.png');
-    let displ = this.textureLoader.load('textures/stone/DisplacementMap.png');
-    let normal = this.textureLoader.load('textures/stone/NormalMap.png');
-    let specular = this.textureLoader.load('textures/stone/SpecularMap.png');
+    this.cubeCamera1 = new CubeCamera(1, 1000, 256);
+    this.cubeCamera1.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
+    this.scene.add(this.cubeCamera1);
+
+    this.cubeCamera2 = new CubeCamera(1, 1000, 256);
+    this.cubeCamera2.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
+    this.scene.add(this.cubeCamera2);
 
     let geometry = new BoxGeometry(200, 200, 200);
-    let material = new MeshPhysicalMaterial({
-      displacementMap: displ,
-      envMap: amb,
-      normalMap: normal,
-      map: specular
+    this.material = new MeshBasicMaterial({
+      envMap: this.cubeCamera2.renderTarget.texture,
     });
 
-    const light = new PointLight(0xFFFFFF, 1);
-    light.position.copy(this.camera.position);
-    this.scene.add(light);
 
-    this.mesh = new Mesh(geometry, material);
-    this.mesh.position.set(0, 0, -300);
-    this.scene.add(this.mesh);
+    this.sphere = new Mesh(new IcosahedronGeometry(20, 3), this.material);
+    this.scene.add(this.sphere);
+
+    this.cube = new Mesh(new BoxBufferGeometry(20, 20, 20), this.material);
+    this.scene.add(this.cube);
+
+    this.torus = new Mesh(new TorusKnotBufferGeometry(10, 5, 100, 25), this.material);
+    this.scene.add(this.torus);
+
     this.animate();
   }
 
+
+  private lat: number = 0;
+  private lon: number = 0;
+
+  private phi: number;
+  private theta: number;
+
+  public render() {
+    this.count++;
+    let time = Date.now();
+
+    this.lon += .15;
+
+    this.lat = Math.max(- 85, Math.min(85, this.lat));
+    this.phi = ThreeMath.degToRad(90 - this.lat);
+    this.theta = ThreeMath.degToRad(this.lon);
+    this.cube.position.x = Math.cos(time * 0.001) * 30;
+    this.cube.position.y = Math.sin(time * 0.001) * 30;
+    this.cube.position.z = Math.sin(time * 0.001) * 30;
+
+    this.cube.rotation.x += 0.02;
+    this.cube.rotation.y += 0.03;
+
+    this.torus.position.x = Math.cos(time * 0.001 + 10) * 30;
+    this.torus.position.y = Math.sin(time * 0.001 + 10) * 30;
+    this.torus.position.z = Math.sin(time * 0.001 + 10) * 30;
+
+    this.torus.rotation.x += 0.02;
+    this.torus.rotation.y += 0.03;
+
+    // this.camera.position.x = 100 * Math.sin(this.phi) * Math.cos(this.theta);
+    // this.camera.position.y = 100 * Math.cos(this.phi);
+    // this.camera.position.z = 100 * Math.sin(this.phi) * Math.sin(this.theta);
+
+    // this.camera.lookAt(this.scene.position);
+
+
+    if (this.count % 2 === 0) {
+
+      this.material.envMap = this.cubeCamera1.renderTarget.texture;
+      this.cubeCamera2.updateCubeMap(this.renderer, this.scene);
+
+    } else {
+
+      this.material.envMap = this.cubeCamera2.renderTarget.texture;
+      this.cubeCamera1.updateCubeMap(this.renderer, this.scene);
+    }
+
+    super.render();
+  }
 
   private _textureLoader: TextureLoader;
   public get textureLoader(): TextureLoader {
@@ -81,17 +154,6 @@ export class Main extends Application {
   public set textureLoader(v: TextureLoader) {
     this._textureLoader = v;
   }
-
-
-  private _mesh: Mesh;
-  public get mesh(): Mesh {
-    return this._mesh;
-  }
-  public set mesh(v: Mesh) {
-    this._mesh = v;
-  }
-
-
 
   public static start(): Main {
     return new Main();
