@@ -13,6 +13,9 @@ export abstract class Application {
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
 
+    this.mouseMoveHandler = this.onDocumentMouseMove.bind(this);
+    this.mouseUpHandler = this.onDocumentMouseUp.bind(this);
+
 
     document.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
     document.addEventListener('wheel', this.onDocumentMouseWheel.bind(this), false);
@@ -68,6 +71,8 @@ export abstract class Application {
   protected phi: number = 0;
   protected theta: number = 0;
 
+  private mouseMoveHandler: any;
+  private mouseUpHandler: any;
   public onDocumentMouseDown(event) {
 
     event.preventDefault();
@@ -78,8 +83,10 @@ export abstract class Application {
     this.onPointerDownLon = this.lon;
     this.onPointerDownLat = this.lat;
 
-    document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
-    document.addEventListener('mouseup', this.onDocumentMouseUp.bind(this), false);
+
+
+    document.addEventListener('mousemove', this.mouseMoveHandler, false);
+    document.addEventListener('mouseup', this.mouseUpHandler, false);
 
   }
 
@@ -89,8 +96,8 @@ export abstract class Application {
   }
 
   public onDocumentMouseUp(event) {
-    document.removeEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
-    document.removeEventListener('mouseup', this.onDocumentMouseUp.bind(this), false);
+    document.removeEventListener('mousemove', this.mouseMoveHandler, false);
+    document.removeEventListener('mouseup', this.mouseUpHandler, false);
   }
 
   public onDocumentMouseWheel(event) {
