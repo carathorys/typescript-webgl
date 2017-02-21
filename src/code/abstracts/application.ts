@@ -3,12 +3,11 @@ import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 export abstract class Application {
 
   constructor() {
-    this._camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+    this._camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
 
     this._scene = new Scene();
 
-    this._renderer = new WebGLRenderer({
-    });
+    this._renderer = new WebGLRenderer({ antialias: true });
     this._renderer.setPixelRatio(window.devicePixelRatio);
     this._renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this._renderer.domElement);
@@ -21,8 +20,6 @@ export abstract class Application {
     document.addEventListener('wheel', this.onDocumentMouseWheel.bind(this), false);
 
     window.addEventListener('resize', this.onWindowResized.bind(this), false);
-
-    window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
 
   public get renderer(): WebGLRenderer {
@@ -40,12 +37,6 @@ export abstract class Application {
   }
   private _scene: Scene;
 
-
-  public onWindowResize(): void {
-    this._camera.aspect = window.innerWidth / window.innerHeight;
-    this._camera.updateProjectionMatrix();
-    this._renderer.setSize(window.innerWidth, window.innerHeight);
-  }
 
   public animate(timestamp = null): void {
     requestAnimationFrame(this.animate.bind(this));
@@ -83,11 +74,8 @@ export abstract class Application {
     this.onPointerDownLon = this.lon;
     this.onPointerDownLat = this.lat;
 
-
-
     document.addEventListener('mousemove', this.mouseMoveHandler, false);
     document.addEventListener('mouseup', this.mouseUpHandler, false);
-
   }
 
   public onDocumentMouseMove(event) {

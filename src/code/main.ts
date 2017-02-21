@@ -8,6 +8,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshPhongMaterial,
+  Material,
   SphereBufferGeometry,
   Texture,
   PointLight,
@@ -48,11 +49,11 @@ export class Main extends Application {
   }
 
 
-  private _material: MeshPhongMaterial;
-  public get material(): MeshPhongMaterial {
+  private _material: Material;
+  public get material(): Material {
     return this._material;
   }
-  public set material(v: MeshPhongMaterial) {
+  public set material(v: Material) {
     this._material = v;
   }
 
@@ -72,9 +73,9 @@ export class Main extends Application {
     skybox.scale.x = -1;
     this.scene.add(skybox);
 
-    // var light = new PointLight(0xff0000, 1, 100);
-    // light.position.set(400, 50, 50);
-    // this.scene.add(light);
+    let light = new PointLight(0xff0000, 3, 1000);
+    light.position.set(400, 50, 50);
+    this.scene.add(light);
 
     this.cubeCamera1 = new CubeCamera(1, 1000, 256);
     this.cubeCamera1.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
@@ -84,8 +85,9 @@ export class Main extends Application {
     this.cubeCamera2.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.scene.add(this.cubeCamera2);
 
-    this.material = new MeshPhongMaterial({
-      envMap: this.cubeCamera2.renderTarget.texture,
+    this.material = new MeshBasicMaterial({
+      color: 0xff0000,
+      envMap: this.cubeCamera1.renderTarget.texture
     });
 
     this.sphere = new Mesh(new IcosahedronGeometry(20, 3), this.material);
@@ -101,7 +103,6 @@ export class Main extends Application {
 
 
   public render() {
-    this.count++;
     let time = Date.now();
 
     this.lon += .15;
@@ -109,6 +110,7 @@ export class Main extends Application {
     this.lat = Math.max(- 85, Math.min(85, this.lat));
     this.phi = ThreeMath.degToRad(90 - this.lat);
     this.theta = ThreeMath.degToRad(this.lon);
+
     this.cube.position.x = Math.cos(time * 0.001) * 30;
     this.cube.position.y = Math.sin(time * 0.001) * 30;
     this.cube.position.z = Math.sin(time * 0.001) * 30;
@@ -127,18 +129,18 @@ export class Main extends Application {
     this.camera.position.x = 100 * Math.sin(this.phi) * Math.cos(this.theta);
     this.camera.position.y = 100 * Math.cos(this.phi);
     this.camera.position.z = 100 * Math.sin(this.phi) * Math.sin(this.theta);
+
     this.sphere.visible = false;
 
     if (this.count % 2 === 0) {
-      this.material.envMap = this.cubeCamera1.renderTarget.texture;
+      (<MeshPhongMaterial>this.material).envMap = this.cubeCamera1.renderTarget.texture;
       this.cubeCamera2.updateCubeMap(this.renderer, this.scene);
     } else {
-      this.material.envMap = this.cubeCamera2.renderTarget.texture;
+      (<MeshPhongMaterial>this.material).envMap = this.cubeCamera2.renderTarget.texture;
       this.cubeCamera1.updateCubeMap(this.renderer, this.scene);
     }
-    this.count++;
-
     this.sphere.visible = true;
+    this.count++;
   }
 
   private _textureLoader: TextureLoader;
