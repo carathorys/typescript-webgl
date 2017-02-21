@@ -73,7 +73,7 @@ export class Main extends Application {
     skybox.scale.x = -1;
     this.scene.add(skybox);
 
-    let light = new PointLight(0xff0000, 3, 1000);
+    let light = new PointLight(0xaaaa00, 3, 1000);
     light.position.set(400, 50, 50);
     this.scene.add(light);
 
@@ -85,8 +85,8 @@ export class Main extends Application {
     this.cubeCamera2.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.scene.add(this.cubeCamera2);
 
-    this.material = new MeshBasicMaterial({
-      color: 0xff0000,
+    this.material = new MeshPhongMaterial({
+      color: 0xffffff,
       envMap: this.cubeCamera1.renderTarget.texture
     });
 
