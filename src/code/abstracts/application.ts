@@ -4,7 +4,6 @@ export abstract class Application {
 
   constructor() {
     this._camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
-
     this._scene = new Scene();
 
     this._renderer = new WebGLRenderer({ antialias: true });
