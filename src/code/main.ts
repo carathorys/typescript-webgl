@@ -1,5 +1,6 @@
 import { Application } from './abstracts';
 import {
+  BoxGeometry,
   BoxBufferGeometry,
   CubeCamera,
   IcosahedronGeometry,
@@ -31,6 +32,7 @@ export class Main extends Application {
   private sphere: Mesh;
   private torus: Mesh;
   private cube: Mesh;
+  private cube2: Mesh;
 
   private _cubeCamera1: CubeCamera;
   public get cubeCamera1(): CubeCamera {
@@ -57,6 +59,14 @@ export class Main extends Application {
     this._material = v;
   }
 
+  private _material2: Material;
+  public get material2(): Material {
+    return this._material2;
+  }
+  public set material2(v: Material) {
+    this._material2 = v;
+  }
+
   constructor() {
     super();
 
@@ -74,7 +84,7 @@ export class Main extends Application {
     this.scene.add(skybox);
 
     let light = new PointLight(0xaaaa00, 3, 1000);
-    light.position.set(400, 50, 50);
+    light.position.set(400, 100, 50);
     this.scene.add(light);
 
     this.cubeCamera1 = new CubeCamera(1, 1000, 256);
@@ -85,9 +95,12 @@ export class Main extends Application {
     this.cubeCamera2.renderTarget.texture.minFilter = LinearMipMapLinearFilter;
     this.scene.add(this.cubeCamera2);
 
-    this.material = new MeshPhongMaterial({
+    this.material = new MeshBasicMaterial({
       color: 0xffffff,
       envMap: this.cubeCamera1.renderTarget.texture
+    });
+    this.material2 = new MeshPhongMaterial({
+      color: 0xffffff,
     });
 
     this.sphere = new Mesh(new IcosahedronGeometry(20, 3), this.material);
@@ -95,6 +108,11 @@ export class Main extends Application {
 
     this.cube = new Mesh(new BoxBufferGeometry(20, 20, 20), this.material);
     this.scene.add(this.cube);
+
+    this.cube2 = new Mesh(new BoxGeometry(500, 20, 500), this.material2);
+
+    this.cube2.position.setY(-70);
+    this.scene.add(this.cube2);
 
     this.torus = new Mesh(new TorusKnotBufferGeometry(10, 5, 100, 25), this.material);
     this.scene.add(this.torus);
